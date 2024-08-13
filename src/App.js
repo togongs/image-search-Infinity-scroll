@@ -1,4 +1,3 @@
-import { getNextKeyDef } from "@testing-library/user-event/dist/keyboard/getNextKeyDef";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RotatingLines } from "react-loader-spinner";
 import useSWRInfinite from "swr/infinite";
@@ -7,10 +6,8 @@ import useIntersectionObserver from "./hooks/useIntersectionObserver";
 
 const AccesKey = process.env.REACT_APP_API_KEY;
 const getKey = (pageIndex, previousPageData, query) => {
-  // 현재페이지의 index, 이전페이지의 data
   if (!query) return null;
-  if (previousPageData && previousPageData?.results?.length === 0) return null; // 마지막 데이터에 도달했다면
-  // new key return
+  if (previousPageData && previousPageData?.results?.length === 0) return null;
   return `https://api.unsplash.com/search/photos?client_id=${AccesKey}&page=${
     pageIndex + 1
   }&query=${query}&per_page=12`;
@@ -22,34 +19,28 @@ function App() {
   const isIntersecting = useIntersectionObserver(ref);
 
   const onKeyDown = useCallback((event) => {
-    // string 앞뒤로 빈칸 확인
     if (event.key === "Enter" && event.target.value.trim().length > 0) {
       setQuery(event.target.value.trim());
     }
   }, []);
 
-  // api호출
   const fetcher = async (url) => {
     const res = await fetch(url);
     return res.json();
   };
 
-  // get new key
   const { data, error, setSize, isValidating } = useSWRInfinite(
     (...args) => getKey(...args, query),
     fetcher,
     {
-      // 옵션
       revalidateFirstPage: false,
       revalidateOnFocus: false,
     }
   );
 
-  // flat() : [[1,2,3,],[4,5,6,]] -> [1,2,3,4,5,6]
-  // 판별 상태
-  const photos = data?.map((item) => item.results).flat() ?? []; // undefined 라면 []
-  const isEmpty = data?.[0]?.results?.length === 0; // 검색결과 없음
-  const isEnd = photos.length === data?.[0].total; // 마지막 데이터에 도달
+  const photos = data?.map((item) => item.results).flat() ?? [];
+  const isEmpty = data?.[0]?.results?.length === 0;
+  const isEnd = photos.length === data?.[0].total;
   const isLoading = (!data && !error && query) || isValidating;
 
   useEffect(() => {
