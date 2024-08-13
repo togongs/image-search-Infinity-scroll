@@ -6,11 +6,15 @@ import useIntersectionObserver from "./hooks/useIntersectionObserver";
 
 const AccesKey = process.env.REACT_APP_API_KEY;
 const getKey = (pageIndex, previousPageData, query) => {
-  if (!query) return null;
   if (previousPageData && previousPageData?.results?.length === 0) return null;
-  return `https://api.unsplash.com/search/photos?client_id=${AccesKey}&page=${
+  const baseUrl = `https://api.unsplash.com/search/photos?client_id=${AccesKey}&page=${
     pageIndex + 1
-  }&query=${query}&per_page=12`;
+  }`;
+  if (!query) {
+    return `${baseUrl}&query=all&per_page=12`;
+  } else {
+    return `${baseUrl}&query=${query}&per_page=12`;
+  }
 };
 
 function App() {
@@ -61,7 +65,7 @@ function App() {
       </div>
       {isEmpty ? <div className="no-result">No Images Found</div> : null}
       <div className="image-container">
-        {photos.map(({ urls, alt_description }, index) => (
+        {photos.map(({ urls, alt_desption }, index) => (
           <img
             className="image"
             key={index}
@@ -75,7 +79,7 @@ function App() {
         {isLoading ? (
           <RotatingLines strokeColor="grey" width="100" />
         ) : isEnd && !isEmpty ? (
-          <p>- No More Images -</p>
+          ""
         ) : null}
       </div>
     </>
